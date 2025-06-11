@@ -170,16 +170,16 @@ def show_one_thing(id):
 def add_a_thing():
     # Get the data from the form
     name  = request.form.get("name")
-    price = request.form.get("price")
 
     # Sanitise the inputs
     name = html.escape(name)
-    price = html.escape(price)
 
+    # Get the user id from the session
+    user_id = session["user_id"]
     with connect_db() as client:
         # Add the thing to the DB
-        sql = "INSERT INTO things (name, price) VALUES (?, ?)"
-        values = [name, price]
+        sql = "INSERT INTO things (name, user_id) VALUES (?, ?)"
+        values = [name, user_id]
         client.execute(sql, values)
 
         # Go back to the home page
@@ -193,13 +193,26 @@ def add_a_thing():
 @app.get("/delete/<int:id>")
 def delete_a_thing(id):
     with connect_db() as client:
-        # Delete the thing from the DB
-        sql = "DELETE FROM things WHERE id=?"
-        values = [id]
+        # Get our user id from a session
+        user_id = session["user_id"]
+        # Delete the thing from the DB checking that we are the owner
+        sql = "DELETE FROM things WHERE id=? AND user_id=?"
+        values = [id, user_id]
         client.execute(sql, values)
 
         # Go back to the home page
         flash("Thing deleted", "warning")
         return redirect("/things")
+    
+#-----------------------------------------------------------
+# Route for logging out
+#-----------------------------------------------------------
+@app.get("/logout")
+def logout():
+    # Clear the session value
+    session.pop("user_id")
+    session.pop("user_name")
+    flash("You have been logged out", "success")
+    return redirect("/")
 
 

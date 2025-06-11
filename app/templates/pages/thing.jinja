@@ -28,7 +28,15 @@
         <p>Owner: <strong>{{ thing.u_name }}</strong></p>
 
         <footer>
-            <a href="/delete/{{ thing.t_id }}" onclick="return confirm('Really delete?');">Delete</a>
+            {% if session.user_id %}
+
+                {% if session.user_id == thing.u_id %}
+
+                    <a href="/delete/{{ thing.t_id }}" onclick="return confirm('Really delete?');">Delete</a>
+
+                {% endif %}
+            
+            {% endif %}
         </footer>
 
     </article>
